@@ -273,10 +273,8 @@ def cmd_login(home: Path) -> int:
         )
         return 1
 
-    try:
-        (state / "qr.png").unlink(missing_ok=True)
-    except OSError:
-        pass
+    # The QR file stays: the sign-in panel keeps drawing it under a caption that
+    # says it is no longer valid, so the panel never collapses into blank space.
     write_json(
         state / "login.json",
         {"status": "succeeded", "finishedAt": now(), "message": "登录成功"},

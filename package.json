@@ -1,11 +1,15 @@
 {
   "name": "local-mifit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
   "description": "dsh-go 手机 App 原生插件：自带扫码登录、取数和面板的小米运动健康数据",
   "keywords": ["dsh-go", "dsh-go-plugin", "mifit", "xiaomi", "health"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luotong2333-web/dsh-go-plugin-mifit.git"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -35,6 +39,12 @@
           "title": { "zh": "小米健康", "en": "Mi Fitness" },
           "icon": "heart",
           "placement": ["session.tab", "features", "chat.panel"]
+        },
+        {
+          "id": "mifit-login",
+          "title": { "zh": "扫码登录", "en": "Sign in" },
+          "icon": "qr",
+          "placement": ["chat.panel", "session.tab", "features"]
         }
       ]
     }
