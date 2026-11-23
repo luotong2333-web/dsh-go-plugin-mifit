@@ -1,6 +1,6 @@
 {
   "name": "local-mifit",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
@@ -23,28 +23,12 @@
     "title": { "zh": "小米健康", "en": "Mi Fitness" },
     "icon": "heart",
     "contributes": {
-      "composer.strip": [
-        { "id": "today", "icon": "heart", "panel": "mifit" }
-      ],
-      "composer.actions": [
-        { "id": "open-health", "label": { "zh": "健康", "en": "Health" }, "icon": "heart" },
-        { "id": "refresh-data", "label": { "zh": "刷新健康", "en": "Refresh" }, "icon": "refresh" }
-      ],
-      "composer.tools": [
-        { "id": "scan-login", "label": { "zh": "扫码登录", "en": "Sign in" }, "icon": "qr" }
-      ],
       "panels": [
         {
           "id": "mifit",
           "title": { "zh": "小米健康", "en": "Mi Fitness" },
           "icon": "heart",
-          "placement": ["session.tab", "features", "chat.panel"]
-        },
-        {
-          "id": "mifit-login",
-          "title": { "zh": "扫码登录", "en": "Sign in" },
-          "icon": "qr",
-          "placement": ["chat.panel", "session.tab", "features"]
+          "placement": ["features"]
         }
       ]
     }
