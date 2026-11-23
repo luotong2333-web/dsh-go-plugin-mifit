@@ -1,9 +1,11 @@
 {
   "name": "local-mifit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "main": "lib/index.js",
+  "description": "dsh-go 手机 App 原生插件：自带扫码登录、取数和面板的小米运动健康数据",
+  "keywords": ["dsh-go", "dsh-go-plugin", "mifit", "xiaomi", "health"],
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -14,64 +16,27 @@
   },
   "dshGo": {
     "v": 1,
-    "title": {
-      "zh": "小米健康",
-      "en": "Mi Fitness"
-    },
+    "title": { "zh": "小米健康", "en": "Mi Fitness" },
     "icon": "heart",
     "contributes": {
       "composer.strip": [
-        {
-          "id": "today",
-          "icon": "heart",
-          "panel": "mifit"
-        }
+        { "id": "today", "icon": "heart", "panel": "mifit" }
       ],
       "composer.actions": [
-        {
-          "id": "open-health",
-          "label": {
-            "zh": "健康",
-            "en": "Health"
-          },
-          "icon": "heart"
-        },
-        {
-          "id": "refresh-data",
-          "label": {
-            "zh": "刷新健康",
-            "en": "Refresh"
-          },
-          "icon": "refresh"
-        }
+        { "id": "open-health", "label": { "zh": "健康", "en": "Health" }, "icon": "heart" },
+        { "id": "refresh-data", "label": { "zh": "刷新健康", "en": "Refresh" }, "icon": "refresh" }
+      ],
+      "composer.tools": [
+        { "id": "scan-login", "label": { "zh": "扫码登录", "en": "Sign in" }, "icon": "qr" }
       ],
       "panels": [
         {
           "id": "mifit",
-          "title": {
-            "zh": "小米健康",
-            "en": "Mi Fitness"
-          },
+          "title": { "zh": "小米健康", "en": "Mi Fitness" },
           "icon": "heart",
-          "placement": [
-            "session.tab",
-            "features",
-            "chat.panel"
-          ]
+          "placement": ["session.tab", "features", "chat.panel"]
         }
       ]
     }
-  },
-  "description": "dsh-go 手机 App 原生插件：把小米运动健康（mifit）导出的步数、睡眠、心率、血氧等数据显示成状态条和面板",
-  "keywords": [
-    "dsh-go",
-    "dsh-go-plugin",
-    "mifit",
-    "xiaomi",
-    "health"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/luotong2333-web/dsh-go-plugin-mifit.git"
   }
 }
