@@ -282,6 +282,77 @@ def cmd_login(home: Path) -> int:
     return 0
 
 
+def write_kinds(home: Path, data: Path, days: int = 120) -> int:
+    """Copy each workout's sport key from the record envelope beside the export.
+
+    The service names a workout with a key (`elliptical_trainer`) on the envelope
+    of the row, not inside the value mifit exports, so the export alone cannot
+    say what a workout was. This reads the same endpoint the SDK reads and
+    writes `workout_kinds.json`: `{updatedAt, kinds: {start_epoch_s: key},
+    codes: {key: sport_type}}`. Earlier entries are kept, so a short window never
+    forgets an older workout. Any failure leaves the file as it was.
+    """
+    site = home / "site"
+    if not (site / "mifit").is_dir():
+        return 0
+    try:
+        sys.path.insert(0, str(site))
+        from mifit import MiFit
+
+        transport = getattr(MiFit(), "_transport", None)
+        if transport is None or not hasattr(transport, "get_paged_result"):
+            return 0
+        end = int(time.time())
+        paged = transport.get_paged_result(
+            "data/get_sport_records_by_time",
+            {
+                "start_time": end - max(1, days) * 86400,
+                "end_time": end,
+                "reverse": True,
+                "limit": 50,
+            },
+            list_key="sport_records",
+            max_pages=20,
+        )
+    except Exception:
+        return 0
+
+    kinds: dict[str, str] = {}
+    codes: dict[str, int] = {}
+    for entry in paged.items:
+        if not isinstance(entry, dict):
+            continue
+        stamp = entry.get("time")
+        key = entry.get("key")
+        if not isinstance(stamp, int) or not isinstance(key, str) or key == "":
+            continue
+        kinds[str(stamp)] = key
+        try:
+            value = json.loads(entry.get("value") or "{}")
+        except (TypeError, ValueError):
+            continue
+        code = value.get("sport_type") if isinstance(value, dict) else None
+        if isinstance(code, int):
+            codes[key] = code
+    if not kinds:
+        return 0
+
+    target = data / "workout_kinds.json"
+    try:
+        stored = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        stored = {}
+    merged_kinds = stored.get("kinds") if isinstance(stored.get("kinds"), dict) else {}
+    merged_codes = stored.get("codes") if isinstance(stored.get("codes"), dict) else {}
+    merged_kinds.update(kinds)
+    merged_codes.update(codes)
+    write_json(
+        target,
+        {"updatedAt": now(), "kinds": merged_kinds, "codes": merged_codes},
+    )
+    return len(merged_kinds)
+
+
 def cmd_fetch(home: Path, data: Path, days: int, domains: list[str]) -> int:
     state = home / "state"
     site = home / "site"
@@ -352,6 +423,9 @@ def cmd_fetch(home: Path, data: Path, days: int, domains: list[str]) -> int:
                 "failed": failed,
             },
         )
+    # The workout names ride along whenever the workouts themselves were read.
+    if "workouts" in done:
+        write_kinds(home, data)
     status = "ok" if not failed else ("partial" if done else "failed")
     write_json(
         state / "fetch.json",
@@ -384,7 +458,7 @@ def cmd_status(home: Path, data: Path) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="mifit sidecar for the local-mifit dsh-go plugin")
-    parser.add_argument("command", choices=["setup", "login", "fetch", "status"])
+    parser.add_argument("command", choices=["setup", "login", "fetch", "kinds", "status"])
     parser.add_argument("--home", required=True)
     parser.add_argument("--data", default="")
     parser.add_argument("--days", type=int, default=7)
@@ -399,6 +473,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "fetch":
         domains = [item.strip() for item in args.domains.split(",") if item.strip()]
         return cmd_fetch(home, data, args.days, domains or list(DEFAULT_DOMAINS))
+    if args.command == "kinds":
+        count = write_kinds(home, data, days=max(1, args.days))
+        print(json.dumps({"kinds": count}, ensure_ascii=False))
+        return 0 if count else 1
     return cmd_status(home, data)
 
 
